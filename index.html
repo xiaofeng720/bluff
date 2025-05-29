@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>德州扑克成功率计算器</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+      background-color: #000000;
+      color: white;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin-top: 5px;
+      font-weight: normal;
+      font-size: 1.2em;
+      color: #cccccc;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .section {
+      background-color: #1a1a1a;
+      width: 90%;
+      max-width: 400px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    }
+
+    button {
+      padding: 15px 25px;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      color: white;
+    }
+
+    .success-btn { background-color: #28a745; }
+    .fail-btn { background-color: #dc3545; }
+
+    .stats {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+
+    .result {
+      margin-top: 8px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .reset-btn {
+      background-color: #ffc107;
+      color: black;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎮 德州扑克成功率计算器</h1>
+<h2>多偷少抓，有牌猛锤，被R就跑</h2>
+
+<div class="container">
+  <!-- 抓鸡成功率 -->
+  <div class="section">
+    <h2>🃏 抓鸡成功率</h2>
+    <button class="success-btn" onclick="recordAction('catch', true)">✅ 成功</button>
+    <button class="fail-btn" onclick="recordAction('catch', false)">❌ 失败</button>
+    <div class="stats" id="catchStats">成功次数：0   失败次数：0</div>
+    <div class="result" id="catchResult">成功率：0%</div>
+    <button class="reset-btn" onclick="resetStats('catch')">🔄 重置</button>
+  </div>
+
+  <!-- 诈唬成功率 -->
+  <div class="section">
+    <h2>🤥 诈唬成功率</h2>
+    <button class="success-btn" onclick="recordAction('bluff', true)">✅ 成功</button>
+    <button class="fail-btn" onclick="recordAction('bluff', false)">❌ 失败</button>
+    <div class="stats" id="bluffStats">成功次数：0   失败次数：0</div>
+    <div class="result" id="bluffResult">成功率：0%</div>
+    <button class="reset-btn" onclick="resetStats('bluff')">🔄 重置</button>
+  </div>
+</div>
+
+<script>
+  // 初始化数据存储
+  const stats = {
+    catch: { success: 0, fail: 0 },
+    bluff: { success: 0, fail: 0 }
+  };
+
+  function recordAction(type, isSuccess) {
+    if (isSuccess) {
+      stats[type].success += 1;
+    } else {
+      stats[type].fail += 1;
+    }
+    updateDisplay(type);
+  }
+
+  function updateDisplay(type) {
+    const s = stats[type].success;
+    const f = stats[type].fail;
+    const total = s + f;
+    const rate = total === 0 ? 0 : ((s / total) * 100).toFixed(2);
+
+    document.getElementById(`${type}Stats`).textContent = `成功次数：${s}   失败次数：${f}`;
+    document.getElementById(`${type}Result`).textContent = `成功率：${rate}%`;
+  }
+
+  function resetStats(type) {
+    stats[type].success = 0;
+    stats[type].fail = 0;
+    updateDisplay(type);
+  }
+</script>
+
+</body>
+</html>
