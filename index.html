@@ -40,17 +40,29 @@
     }
 
     button {
-      padding: 15px 25px;
-      font-size: 18px;
-      margin: 10px;
+      padding: 12px 16px;
+      font-size: 16px;
       cursor: pointer;
       border: none;
       border-radius: 5px;
       color: white;
+      flex: 1;
+      min-width: 100px;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
     }
 
     .success-btn { background-color: #28a745; }
     .fail-btn { background-color: #dc3545; }
+    .record-btn { background-color: #007bff; }
+    .reset-btn { background-color: #ffc107; color: black; }
 
     .stats {
       margin-top: 15px;
@@ -63,28 +75,22 @@
       font-weight: bold;
     }
 
-    .reset-btn {
-      background-color: #ffc107;
-      color: black;
-      margin-top: 10px;
-    }
-
-    .time-record-buttons {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 10px;
-    }
-
     .time-list {
       margin-top: 10px;
       text-align: left;
-      width: 90%;
-      max-width: 400px;
+      width: 100%;
     }
 
     .time-item {
-      padding: 8px;
+      padding: 6px 0;
       font-size: 16px;
+    }
+
+    .export-btn {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 20px;
+      font-size: 18px;
     }
   </style>
 </head>
@@ -94,39 +100,49 @@
 <h2>多偷少抓，有牌猛锤，被R就跑</h2>
 
 <div class="container">
+
   <!-- 抓鸡成功率 -->
   <div class="section">
     <h2>🃏 抓鸡成功率</h2>
-    <button class="success-btn" onclick="recordAction('catch', true)">✅ 成功</button>
-    <button class="fail-btn" onclick="recordAction('catch', false)">❌ 失败</button>
+    <div class="button-group">
+      <button class="success-btn" onclick="recordAction('catch', true)">✅ 成功</button>
+      <button class="fail-btn" onclick="recordAction('catch', false)">❌ 失败</button>
+      <button class="reset-btn" onclick="resetStats('catch')">🔄 重置</button>
+    </div>
     <div class="stats" id="catchStats">成功次数：0   失败次数：0</div>
     <div class="result" id="catchResult">成功率：0%</div>
-    <button class="reset-btn" onclick="resetStats('catch')">🔄 重置</button>
   </div>
 
   <!-- 诈唬成功率 -->
   <div class="section">
     <h2>🤥 诈唬成功率</h2>
-    <button class="success-btn" onclick="recordAction('bluff', true)">✅ 成功</button>
-    <button class="fail-btn" onclick="recordAction('bluff', false)">❌ 失败</button>
+    <div class="button-group">
+      <button class="success-btn" onclick="recordAction('bluff', true)">✅ 成功</button>
+      <button class="fail-btn" onclick="recordAction('bluff', false)">❌ 失败</button>
+      <button class="reset-btn" onclick="resetStats('bluff')">🔄 重置</button>
+    </div>
     <div class="stats" id="bluffStats">成功次数：0   失败次数：0</div>
     <div class="result" id="bluffResult">成功率：0%</div>
-    <button class="reset-btn" onclick="resetStats('bluff')">🔄 重置</button>
   </div>
 
-  <!-- 记录疑问时间 -->
-  <div class="section time-record">
+  <!-- 时间记录 -->
+  <div class="section">
     <h2>⏱️ 疑问时间记录</h2>
-    <div class="time-record-buttons">
-      <button class="success-btn" onclick="recordTime()">📌 记录时间</button>
-      <button class="reset-btn" onclick="clearTimeRecords()">🔄 清空记录</button>
+    <div class="button-group">
+      <button class="record-btn" onclick="recordTime()">📌 记录</button>
+      <button class="reset-btn" onclick="clearTimeRecords()">🔄 重置</button>
     </div>
     <div class="time-list" id="timeList"></div>
   </div>
+
+  <!-- 导出 -->
+  <div class="section">
+    <button class="export-btn" onclick="exportToTxt()">📤 导出记录到TXT</button>
+  </div>
+
 </div>
 
 <script>
-  // 初始化数据存储
   const stats = {
     catch: { success: 0, fail: 0 },
     bluff: { success: 0, fail: 0 }
@@ -135,11 +151,8 @@
   let timeRecords = [];
 
   function recordAction(type, isSuccess) {
-    if (isSuccess) {
-      stats[type].success += 1;
-    } else {
-      stats[type].fail += 1;
-    }
+    if (isSuccess) stats[type].success += 1;
+    else stats[type].fail += 1;
     updateDisplay(type);
   }
 
@@ -148,7 +161,6 @@
     const f = stats[type].fail;
     const total = s + f;
     const rate = total === 0 ? 0 : ((s / total) * 100).toFixed(2);
-
     document.getElementById(`${type}Stats`).textContent = `成功次数：${s}   失败次数：${f}`;
     document.getElementById(`${type}Result`).textContent = `成功率：${rate}%`;
   }
@@ -161,24 +173,51 @@
 
   function recordTime() {
     const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const formattedTime = `${hours}:${minutes}:${seconds}`;
-
+    const formattedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     const index = timeRecords.length + 1;
     timeRecords.push(formattedTime);
-
-    const listDiv = document.getElementById("timeList");
     const item = document.createElement("div");
     item.className = "time-item";
     item.textContent = `${index}. ${formattedTime}`;
-    listDiv.appendChild(item);
+    document.getElementById("timeList").appendChild(item);
   }
 
   function clearTimeRecords() {
     timeRecords = [];
     document.getElementById("timeList").innerHTML = '';
+  }
+
+  function exportToTxt() {
+    const now = new Date();
+    const exportTime = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
+    const catchData = stats.catch;
+    const bluffData = stats.bluff;
+
+    const catchRate = ((catchData.success / (catchData.success + catchData.fail)) * 100 || 0).toFixed(2);
+    const bluffRate = ((bluffData.success / (bluffData.success + bluffData.fail)) * 100 || 0).toFixed(2);
+
+    let content = `== 德州扑克统计数据 ==\n`;
+    content += `导出时间：${exportTime}\n\n`;
+
+    content += `【抓鸡成功率】\n`;
+    content += `成功次数：${catchData.success}\n`;
+    content += `失败次数：${catchData.fail}\n`;
+    content += `成功率：${catchRate}%\n\n`;
+
+    content += `【诈唬成功率】\n`;
+    content += `成功次数：${bluffData.success}\n`;
+    content += `失败次数：${bluffData.fail}\n`;
+    content += `成功率：${bluffRate}%\n\n`;
+
+    content += `【疑问时间记录】\n`;
+    timeRecords.forEach((t, i) => content += `${i+1}. ${t}\n`);
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `德扑统计数据_${exportTime.replace(/:/g, '-')}.txt`;
+    link.click();
   }
 </script>
 
