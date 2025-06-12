@@ -223,7 +223,7 @@
     }
   });
 
-  // 页面加载时从 localStorage 恢复数据
+  // 页面加载恢复数据
   window.addEventListener('load', () => {
     const savedData = JSON.parse(localStorage.getItem('pokerStats'));
     if (savedData) {
@@ -275,7 +275,6 @@
   function updateChart(type) {
     const data = stats[type].history;
     const chart = type === 'catch' ? chartCatch : chartBluff;
-
     chart.data.labels = Array.from({ length: data.length }, (_, i) => i + 1);
     chart.data.datasets[0].data = data.map(d => d);
     chart.update();
@@ -292,6 +291,8 @@
 
   function recordTime() {
     const now = new Date();
+    now.setMinutes(now.getMinutes() - 1); // 减去1分钟
+
     const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
     const fullTime = `${dateStr} ${timeStr}`;
@@ -356,7 +357,7 @@
     if (confirm('确定要清除所有本地数据吗？')) {
       localStorage.removeItem('pokerStats');
       alert('数据已清除');
-      location.reload(); // 刷新页面以清空显示
+      location.reload();
     }
   }
 
