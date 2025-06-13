@@ -68,6 +68,7 @@
     .fail-btn { background-color: #dc3545; }
     .record-btn { background-color: #007bff; }
     .reset-btn { background-color: #ffc107; color: black; }
+    .undo-btn { background-color: #6c757d; }
 
     .stats {
       margin-top: 10px;
@@ -142,6 +143,7 @@
     <h2>⏱️ 疑问时间记录</h2>
     <div class="button-group">
       <button class="record-btn" onclick="recordTime()">📌 记录</button>
+      <button class="undo-btn" onclick="undoLastAction()">↩️ 撤回</button>
       <button class="reset-btn" onclick="clearTimeRecords()">🔄 重置</button>
     </div>
     <div class="time-list" id="timeList"></div>
@@ -166,7 +168,7 @@
 
 </div>
 
-<!-- 引入 Chart.js -->
+<!-- 引入 Chart.js（国外 CDN） -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
 
 <script>
@@ -176,6 +178,7 @@
   };
 
   let timeRecords = [];
+  const actionHistory = []; // 用于存储所有操作历史
 
   // 初始化图表
   const ctxCatch = document.getElementById('catchChart').getContext('2d');
@@ -248,6 +251,54 @@
     const rate = total === 0 ? 0 : ((stats[type].success / total) * 100).toFixed(2);
     stats[type].history.push(parseFloat(rate));
     updateChart(type);
+
+    // 存储操作历史
+    actionHistory.push({ type: 'action', target: type, isSuccess });
+    saveToLocalStorage();
+  }
+
+  function recordTime() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - 1); // 减去1分钟
+
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+    const fullTime = `${dateStr} ${timeStr}`;
+
+    const index = timeRecords.length + 1;
+    timeRecords.push(fullTime);
+    const item = document.createElement("div");
+    item.className = "time-item";
+    item.textContent = `${index}. ${fullTime}`;
+    document.getElementById("timeList").appendChild(item);
+
+    // 存储操作历史
+    actionHistory.push({ type: 'time', time: fullTime });
+    saveToLocalStorage();
+  }
+
+  function undoLastAction() {
+    if (actionHistory.length === 0) {
+      alert('没有可撤回的操作！');
+      return;
+    }
+
+    const lastAction = actionHistory.pop(); // 获取并移除最后一个操作
+
+    if (lastAction.type === 'action') {
+      // 撤回成功/失败操作
+      const { target, isSuccess } = lastAction;
+      if (isSuccess) stats[target].success -= 1;
+      else stats[target].fail -= 1;
+      stats[target].history.pop(); // 移除最后一次的成功率记录
+      updateDisplay(target);
+      updateChart(target);
+    } else if (lastAction.type === 'time') {
+      // 撤回时间记录
+      timeRecords.pop(); // 移除最后一条时间记录
+      renderTimeList();
+    }
+
     saveToLocalStorage();
   }
 
@@ -289,25 +340,9 @@
     saveToLocalStorage();
   }
 
-  function recordTime() {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - 1); // 减去1分钟
-
-    const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-    const fullTime = `${dateStr} ${timeStr}`;
-
-    const index = timeRecords.length + 1;
-    timeRecords.push(fullTime);
-    const item = document.createElement("div");
-    item.className = "time-item";
-    item.textContent = `${index}. ${fullTime}`;
-    document.getElementById("timeList").appendChild(item);
-    saveToLocalStorage();
-  }
-
   function clearTimeRecords() {
     timeRecords = [];
+    actionHistory.length = 0; // 清空操作历史
     document.getElementById("timeList").innerHTML = '';
     saveToLocalStorage();
   }
@@ -349,7 +384,8 @@
     localStorage.setItem('pokerStats', JSON.stringify({
       catch: stats.catch,
       bluff: stats.bluff,
-      timeRecords
+      timeRecords,
+      actionHistory
     }));
   }
 
