@@ -13,7 +13,7 @@
       margin: 0;
     }
 
-    h1, h2 {
+    h1, h2,h3 {
       margin-top: 10px;
       margin-bottom: 10px;
       font-weight: normal;
@@ -27,7 +27,12 @@
       font-size: 16px;
       color: #cccccc;
     }
-
+	
+	h3 {
+      font-size: 16px;
+      color: #cccccc;
+    }
+	
     .container {
       display: flex;
       flex-direction: column;
@@ -79,6 +84,12 @@
       font-weight: bold;
     }
 
+    .tip-text {
+      font-size: 16px;
+      color: #FFD700;
+      margin-top: 5px;
+    }
+
     .time-list {
       margin-top: 10px;
       text-align: left;
@@ -113,6 +124,7 @@
 
 <h1>🎮 德州扑克成功率计算器</h1>
 <h2>多偷少抓，有牌猛锤，被R就跑</h2>
+<h3>拥抱错误，拥抱亏损，拥抱失败！【这样才能不断前行，不断进步】</h3>
 
 <div class="container">
 
@@ -125,6 +137,7 @@
       <button class="reset-btn" onclick="resetStats('catch')">🔄 重置</button>
     </div>
     <div class="stats" id="catchStats">成功：0 失败：0 <span class="rate-text" id="catchRateText">成功率：0%</span></div>
+    <div class="tip-text">不抓紧弱，多抓老板</div>
   </div>
 
   <!-- 诈唬成功率 -->
@@ -136,6 +149,7 @@
       <button class="reset-btn" onclick="resetStats('bluff')">🔄 重置</button>
     </div>
     <div class="stats" id="bluffStats">成功：0 失败：0 <span class="rate-text" id="bluffRateText">成功率：0%</span></div>
+    <div class="tip-text">多偷reg，少偷老板</div>
   </div>
 
   <!-- 时间记录 -->
